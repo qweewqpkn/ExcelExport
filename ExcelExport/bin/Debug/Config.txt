@@ -1,0 +1,4 @@
+..\..\..\Config\
+..\..\..\Output\ByteConfig\
+..\..\..\Output\CSharpConfig\
+..\..\..\Output\LuaConfig\
