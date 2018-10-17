@@ -1,0 +1,6 @@
+包含两个项目
+1.ExcelExport 用于将excel导出为二进制数据
+根据跟exe同一级的目录中的config中获取导出路径，也就是Excel/Output/目录，记得我们要将导出的
+c#脚本加入到ExcelBinaryReader项目中去，这样才能正常读取对应的数据。
+
+2.ExcelBinaryReader 用于将二进制数据加载进内存中
