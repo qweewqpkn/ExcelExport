@@ -17,6 +17,7 @@ namespace BinaryConfig
         public Dictionary<int, int> mIntIntDic;
         public Dictionary<int, string> mIntStringDic;
         public Dictionary<string, int> mStringIntDic;
+        public Dictionary<string, string> mStringStringDic;
 
         public int GetInt()
         {
@@ -76,6 +77,10 @@ namespace BinaryConfig
         {
             return mStringIntDic;
         }
+        public Dictionary<string, string> GetStringStringDic()
+        {
+            return mStringStringDic;
+        }
     }
 
     class BinaryConfigReader
@@ -95,6 +100,7 @@ namespace BinaryConfig
             eIntIntDic,
             eIntStringDic,
             eStringIntDic,
+            eStringStringDic,
         }
 
         public List<BinaryConfigRow> mBinaryRowList = new List<BinaryConfigRow>();
@@ -235,6 +241,7 @@ namespace BinaryConfig
                                 {
                                     dic[mBinaryReader.ReadInt32()] = mBinaryReader.ReadInt32();
                                 }
+                                fi.mIntIntDic = dic;
                             }
                             break;
                         case DataType.eIntStringDic:
@@ -245,6 +252,7 @@ namespace BinaryConfig
                                 {
                                     dic[mBinaryReader.ReadInt32()] = mBinaryReader.ReadString();
                                 }
+                                fi.mIntStringDic = dic;
                             }
                             break;
                         case DataType.eStringIntDic:
@@ -255,6 +263,18 @@ namespace BinaryConfig
                                 {
                                     dic[mBinaryReader.ReadString()] = mBinaryReader.ReadInt32();
                                 }
+                                fi.mStringIntDic = dic;
+                            }
+                            break;
+                        case DataType.eStringStringDic:
+                            {
+                                int length = mBinaryReader.ReadInt32();
+                                Dictionary<string, string> dic = new Dictionary<string, string>();
+                                for (int k = 0; k < length; k++)
+                                {
+                                    dic[mBinaryReader.ReadString()] = mBinaryReader.ReadString();
+                                }
+                                fi.mStringStringDic = dic;
                             }
                             break;
                     }

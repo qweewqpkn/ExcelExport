@@ -15,23 +15,6 @@ class ExportToCSharp
 
     private static BinaryWriter mMergeBinaryWriter;
 
-    public enum DataType
-    {
-        eError = -1,
-        eInt,
-        eFloat,
-        eString,
-        eBool,
-        eShort,
-        eIntList,
-        eFloatList,
-        eStringList,
-        eBoolList,
-        eIntIntDic,
-        eIntStringDic,
-        eStringIntDic,
-    }
-
 
     public static void Export()
     {
@@ -70,34 +53,6 @@ class ExportToCSharp
         mMergeBinaryWriter.Write(bytes);
     }
 
-    static int GetRealColumns(int columns, DataRow nameRow)
-    {
-        int realColumns = 0;
-        for (int i = 0; i < columns; i++)
-        {
-            if (!string.IsNullOrEmpty(nameRow[i].ToString()))
-            {
-                realColumns++;
-            }
-        }
-
-        return realColumns;
-    }
-
-    static int GetClientColumns(int columns, DataRow csRow)
-    {
-        int realColumns = 0;
-        for (int i = 0; i < columns; i++)
-        {
-            if (csRow[i].ToString().Contains("c"))
-            {
-                realColumns++;
-            }
-        }
-
-        return realColumns;
-    }
-
     static byte[] ExportExcelToByte(DataTable sheet, string path)
     {
         string outputPath = mBinaryPath + Path.GetFileNameWithoutExtension(path) + ".byte";
@@ -109,12 +64,12 @@ class ExportToCSharp
         DataRow typeRow = sheet.Rows[2];
         DataRow csRow = sheet.Rows[3];
         int rowNum = sheet.Rows.Count;
-        int columnNum = GetRealColumns(sheet.Columns.Count, nameRow);
+        int columnNum = Utility.GetRealColumns(sheet.Columns.Count, nameRow);
 
         //写入行数   
         bw.Write(rowNum - 4);
         //写入列数
-        bw.Write(GetClientColumns(sheet.Columns.Count, csRow));
+        bw.Write(Utility.GetClientColumns(sheet.Columns.Count, csRow));
         //写入名字
         for (int i = 0; i < columnNum; i++)
         {
@@ -125,7 +80,7 @@ class ExportToCSharp
         for (int i = 0; i < columnNum; i++)
         {
             if (csRow[i].ToString().Contains("c"))
-                bw.Write((int)SwitchTypeToEnumType(typeRow[i].ToString()));
+                bw.Write((int)Utility.SwitchTypeToEnumType(typeRow[i].ToString()));
         }
         //写入剩余数据
         for (int i = 4; i < rowNum; i++)
@@ -136,7 +91,7 @@ class ExportToCSharp
                 if (csRow[j].ToString().Contains("c"))
                 {
                     string strValue = dataRow[j].ToString();
-                    DataType type = SwitchTypeToEnumType(typeRow[j].ToString());
+                    DataType type = Utility.SwitchTypeToEnumType(typeRow[j].ToString());
                     switch (type)
                     {
                         case DataType.eInt:
@@ -363,6 +318,27 @@ class ExportToCSharp
                                 }
                             }
                             break;
+                        case DataType.eStringStringDic:
+                            {
+                                if (string.IsNullOrEmpty(strValue))
+                                {
+                                    bw.Write(0);
+                                }
+                                else
+                                {
+                                    string[] list = strValue.Split(',');
+                                    bw.Write(list.Length);
+                                    for (int k = 0; k < list.Length; k++)
+                                    {
+                                        string[] pairs = list[k].Split(':');
+                                        string key = pairs[0];
+                                        string value = pairs[1];
+                                        bw.Write(key);
+                                        bw.Write(value);
+                                    }
+                                }
+                            }
+                            break;
                     }
                 }
             }
@@ -397,7 +373,7 @@ class ExportToCSharp
         DataRow typeRow = sheet.Rows[2];
         DataRow csRow = sheet.Rows[3];
         int rowNum = sheet.Rows.Count;
-        int columnNum = GetRealColumns(sheet.Columns.Count, nameRow);
+        int columnNum = Utility.GetRealColumns(sheet.Columns.Count, nameRow);
 
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("using System.Collections.Generic;");
@@ -413,8 +389,8 @@ class ExportToCSharp
                 sb.AppendLine("        /// <summary>");
                 sb.AppendFormat("        /// {0}\r\n", System.Text.RegularExpressions.Regex.Replace(commentRow[i].ToString(), "[\r\n\t]", ""));
                 sb.AppendLine("        /// <summary>");
-                sb.AppendFormat("        private {0} m{1};\r\n", SwitchTypeTpRealType(typeRow[i].ToString()), nameRow[i]);
-                sb.AppendFormat("        public {0} {1}\r\n", SwitchTypeTpRealType(typeRow[i].ToString()), nameRow[i]);
+                sb.AppendFormat("        private {0} m{1};\r\n", SwitchTypeToRealType(typeRow[i].ToString()), nameRow[i]);
+                sb.AppendFormat("        public {0} {1}\r\n", SwitchTypeToRealType(typeRow[i].ToString()), nameRow[i]);
                 sb.AppendLine("        {");
                 sb.AppendLine("            get" + "{" + " return m" + nameRow[i] + ";}");
                 sb.AppendLine("        }");
@@ -494,12 +470,16 @@ class ExportToCSharp
                 {
                     return "GetStringIntDic";
                 }
+            case "{string:string}":
+                {
+                    return "GetStringStringDic";
+                }
         }
 
         return "";
     }
 
-    static string SwitchTypeTpRealType(string type)
+    static string SwitchTypeToRealType(string type)
     {
         type = type.ToLower();
         switch (type)
@@ -552,67 +532,13 @@ class ExportToCSharp
                 {
                     return "Dictionary<string,int>";
                 }
+            case "{string:string}":
+                {
+                    return "Dictionary<string,string>";
+                }
         }
 
         return "";
-    }
-
-    static DataType SwitchTypeToEnumType(string type)
-    {
-        type = type.ToLower();
-        switch (type)
-        {
-            case "int":
-                {
-                    return DataType.eInt;
-                }
-            case "float":
-                {
-                    return DataType.eFloat;
-                }
-            case "string":
-                {
-                    return DataType.eString;
-                }
-            case "bool":
-                {
-                    return DataType.eBool;
-                }
-            case "short":
-                {
-                    return DataType.eShort;
-                }
-            case "intarr":
-                {
-                    return DataType.eIntList;
-                }
-            case "floatarr":
-                {
-                    return DataType.eFloatList;
-                }
-            case "stringarr":
-                {
-                    return DataType.eStringList;
-                }
-            case "boolarr":
-                {
-                    return DataType.eBoolList;
-                }
-            case "{int:int}":
-                {
-                    return DataType.eIntIntDic;
-                }
-            case "{int:string}":
-                {
-                    return DataType.eIntStringDic;
-                }
-            case "{string:int}":
-                {
-                    return DataType.eStringIntDic;
-                }
-        }
-
-        return DataType.eError;
     }
 }
 

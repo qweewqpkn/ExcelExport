@@ -9,7 +9,7 @@ namespace ExcelBinaryReader
         static void Main(string[] args)
         {
             BinaryConfigManager.Instance.LoadAllBinaryData(@"E:\code\C#\ExcelExport\Output\ByteConfig\Config.byte");
-            List<BattleSkill> list = BinaryConfigManager.Instance.LoadBinaryData<BattleSkill>("BattleSkill");
+            List<Achieve> list = BinaryConfigManager.Instance.LoadBinaryData<Achieve>("Achieve");
         }
     }
 }

@@ -75,6 +75,22 @@ namespace BinaryConfig
         {
             get{ return msort_id;}
         }
+        /// <summary>
+        /// as11
+        /// <summary>
+        private Dictionary<string,string> mtest;
+        public Dictionary<string,string> test
+        {
+            get{ return mtest;}
+        }
+        /// <summary>
+        /// as11
+        /// <summary>
+        private string[] mtest1;
+        public string[] test1
+        {
+            get{ return mtest1;}
+        }
         public void Init(BinaryConfigRow row)
         {
             mid = row.GetFieldInfo(0).GetInt();
@@ -86,6 +102,8 @@ namespace BinaryConfig
             mpartner_list = row.GetFieldInfo(6).GetIntList();
             mreward = row.GetFieldInfo(7).GetInt();
             msort_id = row.GetFieldInfo(8).GetInt();
+            mtest = row.GetFieldInfo(9).GetStringStringDic();
+            mtest1 = row.GetFieldInfo(10).GetStringList();
         }
     }
 }

@@ -48,7 +48,7 @@ class ExportToLua
         DataRow typeRow = sheet.Rows[2];
         DataRow csRow = sheet.Rows[3];
         int rowNum = sheet.Rows.Count;
-        int columnNum = GetRealColumns(sheet.Columns.Count, nameRow);
+        int columnNum = Utility.GetRealColumns(sheet.Columns.Count, nameRow);
 
         StringBuilder sb = new StringBuilder();
         sb.AppendFormat("local {0} = {1}\r\n", fileName, "{"); 
@@ -62,7 +62,74 @@ class ExportToLua
             {
                 if (csRow[j].ToString().Contains("c"))
                 {
-                    sb.AppendFormat("{0} = {1},", nameRow[j], dataRow[j]);
+                    string strValue = dataRow[j].ToString();
+                    DataType type = Utility.SwitchTypeToEnumType(typeRow[j].ToString());
+                    switch (type)
+                    {
+                        case DataType.eIntList:
+                        case DataType.eBoolList:
+                        case DataType.eFloatList:
+                            {
+                                sb.AppendFormat("{0} = {1}{2}{3}, ", nameRow[j], "{", strValue, "}");
+                            }
+                            break;
+                        case DataType.eStringList:
+                            {
+                                sb.AppendFormat("{0} = {1}", nameRow[j], "{");
+                                if(!string.IsNullOrEmpty(strValue))
+                                {
+                                    string[] list = strValue.Split(',');
+                                    for (int k = 0; k < list.Length; k++)
+                                    {
+                                        sb.AppendFormat("\"{0}\", ", list[k]);
+                                    }
+                                }
+
+                                sb.Append("},");
+                            }
+                            break;
+                        case DataType.eStringIntDic:
+                            {
+                                sb.AppendFormat("{0} = {1}", nameRow[j], "{");
+                                if (!string.IsNullOrEmpty(strValue))
+                                {
+                                    string[] list = strValue.Split(',');
+                                    for (int k = 0; k < list.Length; k++)
+                                    {
+                                        string[] keyValues = list[k].Split(':');
+                                        if (keyValues.Length == 2)
+                                        {
+                                            sb.AppendFormat("{0} = {1}, ", keyValues[0], keyValues[1]);
+                                        }
+                                    }
+                                }
+                                sb.Append("}, ");
+                            }
+                            break;
+                        case DataType.eStringStringDic:
+                            {
+                                sb.AppendFormat("{0} = {1}", nameRow[j], "{");
+                                if (!string.IsNullOrEmpty(strValue))
+                                {
+                                    string[] list = strValue.Split(',');
+                                    for (int k = 0; k < list.Length; k++)
+                                    {
+                                        string[] keyValues = list[k].Split(':');
+                                        if (keyValues.Length == 2)
+                                        {
+                                            sb.AppendFormat("{0} = \"{1}\", ", keyValues[0], keyValues[1]);
+                                        }
+                                    }
+                                }
+                                sb.Append("}, ");
+                            }
+                            break;
+                        default:
+                            {
+                                sb.AppendFormat("{0} = {1}, ", nameRow[j], dataRow[j]);
+                            }
+                            break;
+                    }
                 }
             }
             sb.Append("},\r\n");
@@ -74,19 +141,5 @@ class ExportToLua
 
         sw.Close();
         fs.Close();
-    }
-
-    static int GetRealColumns(int columns, DataRow nameRow)
-    {
-        int realColumns = 0;
-        for (int i = 0; i < columns; i++)
-        {
-            if (!string.IsNullOrEmpty(nameRow[i].ToString()))
-            {
-                realColumns++;
-            }
-        }
-
-        return realColumns;
     }
 }
