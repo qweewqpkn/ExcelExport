@@ -40,8 +40,21 @@ class ExportToLua
     {
         string fileName = Path.GetFileNameWithoutExtension(path);
         string outputPath = mCodePath + fileName + ".lua";
-        FileStream fs = File.Open(outputPath, FileMode.Create, FileAccess.ReadWrite);
+        FileStream fs = File.Open(outputPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
         StreamWriter sw = new StreamWriter(fs);
+
+        StreamReader sr = new StreamReader(fs);
+        string content = sr.ReadToEnd();
+        string startFlag = "--@start 自动导出,请勿修改";
+        string endFlag = "--@end";
+        int endIndex = content.IndexOf(endFlag);
+        string endContent = "";
+        if (endIndex != -1)
+        {
+            endContent = content.Substring(endIndex + endFlag.Length + 2);
+        }
+        fs.Seek(0, SeekOrigin.Begin);
+        fs.SetLength(0);
 
         DataRow nameRow = sheet.Rows[0];
         DataRow commentRow = sheet.Rows[1];
@@ -51,6 +64,7 @@ class ExportToLua
         int columnNum = Utility.GetRealColumns(sheet.Columns.Count, nameRow);
 
         StringBuilder sb = new StringBuilder();
+        sb.AppendLine(startFlag);
         sb.AppendFormat("local {0} = {1}\r\n", fileName, "{"); 
 
         for (int i = 4; i < rowNum; i++)
@@ -136,7 +150,8 @@ class ExportToLua
         }
 
         sb.AppendLine("}");
-
+        sb.AppendLine(endFlag);
+        sb.Append(endContent);
         sw.Write(sb);
 
         sw.Close();

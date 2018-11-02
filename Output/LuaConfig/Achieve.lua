@@ -1,3 +1,4 @@
+--@start 自动导出,请勿修改
 local Achieve = {
 {id = 1000, chapter = , achieve_name = 星辰神剑, achieve_detail = 星辰神剑, pic = ui_bg_shouji_1.png, finish_num = 2, partner_list = {1005,1012}, reward = 50000, sort_id = 20, test = {1005 = "噶", 1012 = "阿斯蒂芬", }, test1 = {"设计费看了", "速度快放假啊看见", "神雕房介", },},
 {id = 1001, chapter = , achieve_name = 盛京仙门了不起, achieve_detail = 盛京仙门了不起, pic = ui_bg_shouji_2.png, finish_num = 6, partner_list = {1021,1022,1023,1024,1020,1019}, reward = 50001, sort_id = 19, test = {}, test1 = {},},
@@ -127,3 +128,6 @@ local Achieve = {
 {id = 2126, chapter = 4, achieve_name = 灵宠强化, achieve_detail = 强化灵宠100次, pic = , finish_num = 100, partner_list = {0}, reward = 50175, sort_id = 9892, test = {}, test1 = {},},
 {id = 2127, chapter = 4, achieve_name = 灵宠强化, achieve_detail = 强化灵宠200次, pic = , finish_num = 200, partner_list = {0}, reward = 50176, sort_id = 9891, test = {}, test1 = {},},
 }
+--@end
+
+asdfasfasd
